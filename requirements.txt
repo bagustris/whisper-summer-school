@@ -1,0 +1,11 @@
+openai-whisper
+torch
+torchaudio
+gradio
+transformers
+accelerate
+sentencepiece
+pandas
+numpy
+soundfile
+
