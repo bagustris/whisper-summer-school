@@ -40,7 +40,7 @@ Respond ONLY with valid JSON. No extra text."""
 
 def generate_soap_note(transcript: str, model: str = MEDICAL_MODEL) -> dict:
     """
-    Generate SOAP note dari transkrip menggunakan BioMistral via Ollama.
+    Generate SOAP note dari transkrip menggunakan model Ollama yang dikonfigurasi.
     
     Args:
         transcript: Teks transkrip dokter-pasien

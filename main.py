@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Whisper Summer School - Medical Transcription Pipeline
-Whisper (STT) + BioMistral/OpenMed (SOAP Note Generator)
+Whisper (STT) + Ollama/OpenMed (SOAP Note Generator)
 """
 
 import os
@@ -48,7 +48,7 @@ def run_pipeline(audio_path: str, whisper_model: str = "base", llm_model: str = 
     print(f"💾 Transkrip disimpan: {transcript_file}")
 
     # ── STEP 2: Generate SOAP Note ─────────────────────────
-    print("\n📍 STEP 2: Generate SOAP Note dengan BioMistral...")
+    print(f"\n📍 STEP 2: Generate SOAP Note dengan model: {llm_model}...")
     soap_note = generate_soap_note(transcript_text, model=llm_model)
 
     # ── STEP 3: Simpan Output ──────────────────────────────
@@ -82,8 +82,15 @@ def main():
         help="Ukuran model Whisper (default: base)"
     )
     parser.add_argument(
-        "--llm-model",
+        "--backend", "-b",
+        default="ollama",
+        choices=["ollama"],
+        help="Backend LLM (default: ollama)"
+    )
+    parser.add_argument(
+        "--model", "-m",
         default="llama3.2:3b",
+        dest="llm_model",
         help="Model LLM untuk SOAP note (default: llama3.2:3b)"
     )
     parser.add_argument(
