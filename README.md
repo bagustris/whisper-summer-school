@@ -139,6 +139,66 @@ python app_emr_demo.py
 
 ---
 
+## 📦 Dataset
+
+Project ini menggunakan dataset **[Audio Recording Whisper](https://www.kaggle.com/datasets/najamahmed97/audio-recording-whisper)** oleh najamahmed97 (Kaggle) sebagai data benchmark.
+
+**Isi:** Rekaman audio percakapan dokter-pasien dalam bahasa Inggris, dilengkapi **transkrip ground-truth** — ideal untuk menguji pipeline dan mengukur akurasi transkripsi (Word Error Rate).
+
+### Download dataset
+
+**Opsi A — Manual (tanpa akun Kaggle):**
+
+1. Buka [halaman dataset](https://www.kaggle.com/datasets/najamahmed97/audio-recording-whisper) di browser
+2. Klik tombol **Download** → simpan file ZIP
+3. Ekstrak ke folder `audio/`:
+
+```bash
+unzip audio-recording-whisper.zip -d audio/
+```
+
+**Opsi B — Kaggle CLI:**
+
+```bash
+pip install kaggle
+# Letakkan kaggle.json di ~/.kaggle/, lalu:
+kaggle datasets download -d najamahmed97/audio-recording-whisper -p audio/ --unzip
+```
+
+### Jalankan pipeline pada dataset
+
+```bash
+# Satu file
+python main.py audio/<file>.wav --whisper-model base --language en
+
+# Batch — semua file WAV (bash)
+for f in audio/*.wav; do
+    python main.py "$f" --language en --whisper-model small
+done
+```
+
+### Evaluasi akurasi transkripsi (WER)
+
+Karena dataset menyertakan transkrip referensi, akurasi Whisper dapat diukur dengan Word Error Rate:
+
+```bash
+pip install jiwer
+
+python - <<'EOF'
+from jiwer import wer
+from pathlib import Path
+
+for ref_path in Path("audio").glob("*.txt"):
+    hyp_path = Path("outputs") / f"transcript_{ref_path.stem}.txt"
+    if hyp_path.exists():
+        ref = ref_path.read_text().strip()
+        hyp = hyp_path.read_text().strip()
+        print(f"{ref_path.stem}: WER = {wer(ref, hyp):.1%}")
+EOF
+```
+
+---
+
 ## 🤖 Perbandingan Backend LLM
 
 | Backend | Keunggulan | Kelemahan | Kebutuhan |
@@ -198,10 +258,13 @@ Output disimpan otomatis ke `outputs/`:
 ## 🛠️ Konfigurasi (`config.py`)
 
 ```python
-BACKEND = "openmed"              # "openmed" | "ollama" | "hf"
-whisper_cfg.model_size = "base"  # tiny/base/small/medium/large-v3-turbo
-whisper_cfg.language   = "id"    # "id" | "en" | "auto"
-ollama_cfg.model       = "medllama2"
+BACKEND = "ollama"               # "openmed" | "ollama" | "hf"
+
+whisper_cfg.model_size = "base"  # tiny | base | small | medium | large-v3-turbo
+whisper_cfg.language   = "auto"  # "id" | "en" | "auto"
+
+ollama_cfg.model = "llama3.2"
+
 openmed_cfg.deidentify_before_soap = True
 ```
 
@@ -241,7 +304,7 @@ openmed_cfg.deidentify_before_soap = True
 - [x] Mikrofon aktif di localhost (secure context fix)
 - [ ] Whisper `large-v3-turbo` benchmark di Apple Silicon
 - [ ] Output PDF dari SOAP note
-- [ ] Batch processing multiple audio files
+- [x] Batch processing multiple audio files (lihat bagian Dataset)
 
 ---
 
@@ -387,6 +450,66 @@ python app_emr_demo.py
 
 ---
 
+## 📦 Dataset
+
+This project uses the **[Audio Recording Whisper](https://www.kaggle.com/datasets/najamahmed97/audio-recording-whisper)** dataset by najamahmed97 (Kaggle) as a benchmark.
+
+**Contents:** English doctor-patient audio recordings with paired **ground-truth transcripts** — ideal for end-to-end pipeline testing and measuring Whisper transcription accuracy (Word Error Rate).
+
+### Download the dataset
+
+**Option A — Manual (no Kaggle account required):**
+
+1. Open the [dataset page](https://www.kaggle.com/datasets/najamahmed97/audio-recording-whisper) in your browser
+2. Click the **Download** button → save the ZIP file
+3. Extract it into the `audio/` folder:
+
+```bash
+unzip audio-recording-whisper.zip -d audio/
+```
+
+**Option B — Kaggle CLI:**
+
+```bash
+pip install kaggle
+# Place your kaggle.json token in ~/.kaggle/, then:
+kaggle datasets download -d najamahmed97/audio-recording-whisper -p audio/ --unzip
+```
+
+### Run the pipeline on the dataset
+
+```bash
+# Single file
+python main.py audio/<file>.wav --whisper-model base --language en
+
+# Batch — all WAV files (bash)
+for f in audio/*.wav; do
+    python main.py "$f" --language en --whisper-model small
+done
+```
+
+### Evaluate transcription accuracy (WER)
+
+Since the dataset includes reference transcripts, you can benchmark Whisper's Word Error Rate:
+
+```bash
+pip install jiwer
+
+python - <<'EOF'
+from jiwer import wer
+from pathlib import Path
+
+for ref_path in Path("audio").glob("*.txt"):
+    hyp_path = Path("outputs") / f"transcript_{ref_path.stem}.txt"
+    if hyp_path.exists():
+        ref = ref_path.read_text().strip()
+        hyp = hyp_path.read_text().strip()
+        print(f"{ref_path.stem}: WER = {wer(ref, hyp):.1%}")
+EOF
+```
+
+---
+
 ## 🤖 LLM Backend Comparison
 
 | Backend | Strengths | Weaknesses | Requirements |
@@ -446,10 +569,13 @@ Output saved automatically to `outputs/`:
 ## 🛠️ Configuration (`config.py`)
 
 ```python
-BACKEND = "openmed"              # "openmed" | "ollama" | "hf"
-whisper_cfg.model_size = "base"  # tiny/base/small/medium/large-v3-turbo
-whisper_cfg.language   = "id"    # "id" | "en" | "auto"
-ollama_cfg.model       = "medllama2"
+BACKEND = "ollama"               # "openmed" | "ollama" | "hf"
+
+whisper_cfg.model_size = "base"  # tiny | base | small | medium | large-v3-turbo
+whisper_cfg.language   = "auto"  # "id" | "en" | "auto"
+
+ollama_cfg.model = "llama3.2"
+
 openmed_cfg.deidentify_before_soap = True
 ```
 
@@ -489,7 +615,7 @@ openmed_cfg.deidentify_before_soap = True
 - [x] Microphone fix for localhost (secure context)
 - [ ] Whisper `large-v3-turbo` benchmark on Apple Silicon
 - [ ] PDF export from SOAP note
-- [ ] Batch processing multiple audio files
+- [x] Batch processing multiple audio files (see Dataset section)
 
 ---
 
